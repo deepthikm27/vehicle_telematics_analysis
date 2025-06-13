@@ -1,0 +1,18 @@
+apiVersion: 1
+
+datasources:
+  - name: Infinity Data Source
+    type: marcusolsson-infinity-datasource # Infinity plugin
+    access: proxy
+    url: http://api:8000 #'api' is the service name in docker-compose
+    isDefault: true
+    version: 1
+    editable: true
+    jsonData:
+      dataSources:
+        - name: Vehicle Telemetry
+          type: json
+          url: http://api:8000 # Grafana's API endpoint within the Docker network
+          headers: []
+          params: {}
+    readOnly: false

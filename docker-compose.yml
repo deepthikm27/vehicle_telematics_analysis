@@ -1,0 +1,53 @@
+version: '3.8'
+
+services:
+  # FastAPI Application Service
+  api:
+    build:
+      context: . 
+      dockerfile: Dockerfile
+    container_name: fastapi_api
+    ports:
+      - "8000:8000" # Map host port 8000 to container port 8000
+    volumes:
+      # Mount the current directory (vehicle_telemetry/) into the container for live updates during development
+      - .:/app
+    environment:
+      PYTHONUNBUFFERED: 1 # Ensure Python output is not buffered
+    networks:
+      - telemetry-network
+
+  # Grafana Service
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana_dashboard
+    ports:
+      - "3000:3000"
+    volumes:
+      # Mount Grafana's data volume for persistence (dashboards, users, etc.)
+      - grafana_data:/var/lib/grafana
+      # Mount datasource provisioning directory
+      - ./grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
+      # Mount dashboard provisioning directory
+      - ./grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards
+      # Mount the actual dashboards directory containing your exported dashboard JSON
+      - ./grafana/dashboards:/etc/grafana/dashboards 
+    environment:
+      # Install Grafana plugins (Infinity Data Source in this case)
+      - GF_INSTALL_PLUGINS=marcusolsson-infinity-datasource
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    # Ensure Grafana starts only after the API service is ready
+    depends_on:
+      - api
+    networks:
+      - telemetry-network
+
+# Define a custom bridge network for services to communicate
+networks:
+  telemetry-network:
+    driver: bridge
+
+# Define named volumes for data persistence
+volumes:
+  grafana_data: {} # Volume for Grafana's internal data
