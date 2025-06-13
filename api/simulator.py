@@ -66,9 +66,6 @@ async def data_simulator_task():
     print("Telemetry simulator started (In-Memory Version)")
     global telemetry_data_store, latest_telemetry_per_vehicle
 
-    # No need for complex initial records setup or pruning logic when using deque(maxlen).
-    # The deque will automatically handle keeping only the latest MAX_IN_MEMORY_RECORDS.
-
     # Continuous data generation
     while True:
         await asyncio.sleep(1) # Sleeps for 1 second
@@ -86,6 +83,3 @@ async def data_simulator_task():
             # Update latest_telemetry_per_vehicle
             for r in new_records:
                 latest_telemetry_per_vehicle[r.vehicle_id] = r
-            
-            # The deque's maxlen handles the pruning automatically.
-            # No manual `telemetry_data_store = [r for r in ...]` needed here.
